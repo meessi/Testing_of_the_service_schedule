@@ -1,0 +1,31 @@
+def date = new Date(); // Текущая дата (+ время)
+def serviceTime = utils.get('servicetime$101450623'); // Элемент справочника "Классы обслуживания"
+def timeZone = utils.get('timezone$131801'); // Элемент справочника "Часовые пояса"
+
+def case1 = ['Текущий день - рабочий, время - рабочее; следующий день - рабочий', '14.06.2017 16:00', 'Да'];
+def case2 = ['Текущий день - рабочий, время - нерабочее; следующий день - рабочий', '14.06.2017 19:00', 'Да'];
+def case3 = ['Текущий день - рабочий, время - рабочее;  следующий день - выходной', '16.06.2017 16:00', 'Да'];
+def case4 = ['Текущий день - рабочий, время - нерабочее; следующий день - выходной', '16.06.2017 19:00', 'Да'];
+def case5 = ['Текущий день - выходной, следующий день - выходной', '17.06.2017 16:00', 'Нет'];
+def case6 = ['Текущий день - выходной, следующий день - рабочий', '18.06.2017 16:00', 'Нет'];
+
+def cases = [case1, case2, case3, case4, case5, case6];
+def results = '';
+
+// Ближайшая дата/время обслуживания
+def nearestDateService = 
+{
+	currentDate ->
+		
+	return api.timing.serviceStartTime(currentDate, serviceTime, timeZone); 
+}
+
+for (def i = 0; i < cases.size(); i++)
+{
+	def currentDate = utils.formatters.strToDateTime(cases[i][1]);
+	def nearestDateService_ = nearestDateService(currentDate);
+	def period = nearestDateService_ - currentDate;
+	results = results + cases[i][0] + '. Текущее дата/время: ' + cases[i][1] + '. Отправка в текущий день? - ' + cases[i][2] + '. Ближайшая дата/время обслуживания: ' + utils.formatters.formatDateTime(nearestDateService_) + '. Период: ' + period + '<br><br>';
+}
+
+return results;
