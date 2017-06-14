@@ -1,3 +1,5 @@
+import groovy.time.TimeCategory
+
 def date = new Date(); // Текущая дата (+ время)
 def serviceTime = utils.get('servicetime$101450623'); // Элемент справочника "Классы обслуживания"
 def timeZone = utils.get('timezone$131801'); // Элемент справочника "Часовые пояса"
@@ -20,12 +22,23 @@ def nearestDateService =
 	return api.timing.serviceStartTime(currentDate, serviceTime, timeZone); 
 }
 
+def nextRemainder =
+{
+	currentDate, period ->
+	
+	use(TimeCategory)
+	{
+		return period < 2 ? (currentDate + 1.day - 1.minute) : (currentDate + period.day - 1.minute);
+	}
+}
+
 for (def i = 0; i < cases.size(); i++)
 {
 	def currentDate = utils.formatters.strToDateTime(cases[i][1]);
 	def nearestDateService_ = nearestDateService(currentDate);
 	def period = nearestDateService_ - currentDate;
-	results = results + cases[i][0] + '. Текущее дата/время: ' + cases[i][1] + '. Отправка в текущий день? - ' + cases[i][2] + '. Ближайшая дата/время обслуживания: ' + utils.formatters.formatDateTime(nearestDateService_) + '. Период: ' + period + '<br><br>';
+	def nextRemainder_ = nextRemainder(currentDate, period);
+	results = results + cases[i][0] + '. Текущее дата/время: ' + cases[i][1] + '. Отправка в текущий день? - ' + cases[i][2] + ' Будет ли она выполнена? - ' + (period < 2 ? 'Да' : 'Нет') + '. Ближайшая дата/время обслуживания: ' + utils.formatters.formatDateTime(nearestDateService_) + '. Следующее напоминание: ' + utils.formatters.formatDateTime(nextRemainder_) + '. Период: ' + period + '<br><br>';
 }
 
 return results;
