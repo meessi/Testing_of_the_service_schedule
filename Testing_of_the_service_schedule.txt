@@ -14,31 +14,67 @@ def case6 = ['Текущий день - выходной, следующий д�
 def cases = [case1, case2, case3, case4, case5, case6];
 def results = '';
 
-// Ближайшая дата/время обслуживания
-def nearestDateService = 
+/*
+* Следующая дата/время напоминания
+*
+*/
+def nextDateTimeReminder =
 {
-	currentDate ->
-		
-	return api.timing.serviceStartTime(currentDate, serviceTime, timeZone); 
-}
-
-def nextRemainder =
-{
-	currentDate, period ->
+	currentDateTime, nearestDateTimeService_ ->
 	
+  	def period = nearestDateTimeService_ - currentDateTime;
+  
 	use(TimeCategory)
 	{
-		return period < 2 ? (currentDate + 1.day - 1.minute) : (currentDate + period.day - 1.minute);
+		return period < 2 ? (currentDateTime + 1.day - 1.minute) : (currentDateTime + period.day - 1.minute);
 	}
 }
 
-for (def i = 0; i < cases.size(); i++)
+/*
+* Ближайшая дата/время обслуживания
+*
+*/
+def nearestDateTimeService = 
 {
-	def currentDate = utils.formatters.strToDateTime(cases[i][1]);
-	def nearestDateService_ = nearestDateService(currentDate);
-	def period = nearestDateService_ - currentDate;
-	def nextRemainder_ = nextRemainder(currentDate, period);
-	results = results + cases[i][0] + '. Текущее дата/время: ' + cases[i][1] + '. Отправка в текущий день? - ' + cases[i][2] + ' Будет ли она выполнена? - ' + (period < 2 ? 'Да' : 'Нет') + '. Ближайшая дата/время обслуживания: ' + utils.formatters.formatDateTime(nearestDateService_) + '. Следующее напоминание: ' + utils.formatters.formatDateTime(nextRemainder_) + '. Период: ' + period + '<br><br>';
+	currentDateTime ->
+		
+	return api.timing.serviceStartTime(currentDateTime, serviceTime, timeZone); 
+}
+
+/*
+* Текущий день является днем обслуживания?
+*
+*/
+def currentDayIsService = 
+{
+	currentDateTime ->
+	
+	def currentDate = utils.formatters.strToDate(utils.formatters.formatDate(currentDateTime));
+	def nearestDateTimeService_ = nearestDateTimeService(currentDate);
+	def period = nearestDateTimeService_ - currentDate;
+	
+	return period == 0;
+}
+
+/*
+* Перевод строки в дату
+*
+*/
+def stringToDateTime =
+{
+	string ->
+	
+	return utils.formatters.strToDateTime(string);
+}
+
+for (def i = 0; i < 6; i++)
+{
+	def currentDateTime = stringToDateTime(cases[i][1]);
+	def currentDayIsService_ = currentDayIsService(currentDateTime);
+	def nearestDateTimeService_ = nearestDateTimeService(currentDateTime);
+	def nextDateTimeReminder_ = nextDateTimeReminder(currentDateTime, nearestDateTimeService_);
+	
+	results = results + cases[i][0] + '. Текущее дата/время: ' + cases[i][1] + '. Отправка в текущий день? - ' + cases[i][2] + '. Будет ли она выполнена? - ' + (currentDayIsService_ == true ? 'Да' : 'Нет') + '. Ближайшая дата/время обслуживания: ' + utils.formatters.formatDateTime(nearestDateTimeService_) + '. Следующее напоминание: ' + utils.formatters.formatDateTime(nextDateTimeReminder_) + '<br><br>';
 }
 
 return results;
