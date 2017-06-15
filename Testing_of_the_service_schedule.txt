@@ -74,7 +74,7 @@ for (def i = 0; i < 6; i++)
 	def nearestDateTimeService_ = nearestDateTimeService(currentDateTime);
 	def nextDateTimeReminder_ = nextDateTimeReminder(currentDateTime, nearestDateTimeService_);
 	
-	results = results + cases[i][0] + '. Текущее дата/время: ' + cases[i][1] + '. Отправка в текущий день? - ' + cases[i][2] + '. Будет ли она выполнена? - ' + (currentDayIsService_ == true ? 'Да' : 'Нет') + '. Ближайшая дата/время обслуживания: ' + utils.formatters.formatDateTime(nearestDateTimeService_) + '. Следующее напоминание: ' + utils.formatters.formatDateTime(nextDateTimeReminder_) + '<br><br>';
+	results = results + cases[i][0] + '. Текущее дата/время: ' + cases[i][1] + '. Отправка в текущий день? - ' + cases[i][2] + '. Будет ли она выполнена? - ' + (currentDayIsService_ == true ? 'Да' : 'Нет') + '. Ближайшая дата/время обслуживания: ' + utils.formatters.formatDateTime(nearestDateTimeService_) + '. Следующее напоминание: ' + utils.formatters.formatDateTime(nextDateTimeReminder_) + '<br><br><br>';
 }
 
 return results;
